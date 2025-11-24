@@ -1,43 +1,57 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="CetTodoApp.MainPage">
+             xmlns:local="clr-namespace:CetTodoApp"
+             x:Class="CetTodoApp.MainPage"
+             BackgroundColor="White">
 
-   <VerticalStackLayout Padding="20" Margin="20">
-       
-       <Border Margin="20" >
-           <VerticalStackLayout Margin="10" Padding="10">
-               <Entry x:Name="Title" Placeholder="Enter a todo Item" />
-               <HorizontalStackLayout Padding="20" Margin="10">
-                    <Label Text="Due Date :" VerticalOptions="Center"></Label>
-                    <DatePicker x:Name="DueDate" VerticalOptions="Center" ></DatePicker>
-               </HorizontalStackLayout>
-               <Button x:Name="AddButton" Text="Save" Clicked="AddButton_OnClicked"></Button>
-               
-               
-           </VerticalStackLayout>
-       </Border>
-       <ListView x:Name="TasksListView" ItemSelected="TasksListView_OnItemSelected">
-           <ListView.ItemTemplate>
-               <DataTemplate>
-                   <ViewCell>
-                       <StackLayout Orientation="Horizontal">
-                           <Label Text="{Binding Title}"   
-                                  VerticalOptions="Center"  
-                                  /> 
-                           
-                           <Label 
-                               Text="{Binding DueDate, StringFormat=' (Due: {0:dd/MM})'}"
-                               VerticalOptions="Center"/>
-                           <CheckBox VerticalOptions="Center" IsChecked="{Binding IsComplete}" IsEnabled="False" ></CheckBox>
-                         
-                       </StackLayout>
-                       </ViewCell>
-                   </DataTemplate>
-               </ListView.ItemTemplate>
-           </ListView>
-       
-       
-   </VerticalStackLayout>
+    <Grid RowDefinitions="Auto, *" Padding="20">
+
+        <VerticalStackLayout Grid.Row="0" Spacing="10">
+            <Label Text="Todo Listem" 
+                   FontSize="32" 
+                   FontAttributes="Bold" 
+                   HorizontalOptions="Center" 
+                   TextColor="#512BD4"/>
+
+            <Entry x:Name="TitleEntry" 
+                   Placeholder="Yapılacak işi girin..."
+                   HeightRequest="50"/>
+
+            <DatePicker x:Name="MyDatePicker" 
+                        MinimumDate="01/01/2023"/>
+
+            <Button Text="Ekle" 
+                    Clicked="OnAddClicked" 
+                    BackgroundColor="#512BD4" 
+                    TextColor="White"
+                    CornerRadius="10"/>
+        </VerticalStackLayout>
+
+        <ListView Grid.Row="1" 
+                  ItemsSource="{Binding TodoItems}" 
+                  Margin="0,20,0,0"
+                  HasUnevenRows="True"
+                  SeparatorColor="Gray">
+            
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <StackLayout Padding="10" Orientation="Vertical">
+                            <Label Text="{Binding Title}" 
+                                   FontSize="18" 
+                                   FontAttributes="Bold"
+                                   TextColor="Black"/>
+                            
+                            <Label Text="{Binding DueDate, StringFormat='Tarih: {0:dd/MM/yyyy}'}" 
+                                   FontSize="14" 
+                                   TextColor="Gray"/>
+                        </StackLayout>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+    </Grid>
 
 </ContentPage>
