@@ -1,43 +1,81 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="CetTodoApp.MainPage">
+             xmlns:local="clr-namespace:CetTodoApp"
+             x:Class="CetTodoApp.MainPage"
+             BackgroundColor="White">
 
-   <VerticalStackLayout Padding="20" Margin="20">
-       
-       <Border Margin="20" >
-           <VerticalStackLayout Margin="10" Padding="10">
-               <Entry x:Name="Title" Placeholder="Enter a todo Item" />
-               <HorizontalStackLayout Padding="20" Margin="10">
-                    <Label Text="Due Date :" VerticalOptions="Center"></Label>
-                    <DatePicker x:Name="DueDate" VerticalOptions="Center" ></DatePicker>
-               </HorizontalStackLayout>
-               <Button x:Name="AddButton" Text="Save" Clicked="AddButton_OnClicked"></Button>
-               
-               
-           </VerticalStackLayout>
-       </Border>
-       <ListView x:Name="TasksListView" ItemSelected="TasksListView_OnItemSelected">
-           <ListView.ItemTemplate>
-               <DataTemplate>
-                   <ViewCell>
-                       <StackLayout Orientation="Horizontal">
-                           <Label Text="{Binding Title}"   
-                                  VerticalOptions="Center"  
-                                  /> 
-                           
-                           <Label 
-                               Text="{Binding DueDate, StringFormat=' (Due: {0:dd/MM})'}"
-                               VerticalOptions="Center"/>
-                           <CheckBox VerticalOptions="Center" IsChecked="{Binding IsComplete}" IsEnabled="False" ></CheckBox>
-                         
-                       </StackLayout>
-                       </ViewCell>
-                   </DataTemplate>
-               </ListView.ItemTemplate>
-           </ListView>
-       
-       
-   </VerticalStackLayout>
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <local:ColorConverter x:Key="MyColorConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto, *" Padding="20">
+
+        <VerticalStackLayout Grid.Row="0" Spacing="10">
+            <Label Text="Yapılacaklar Listesi" 
+                   FontSize="28" 
+                   FontAttributes="Bold" 
+                   HorizontalOptions="Center" 
+                   TextColor="#512BD4"/>
+
+            <Entry x:Name="TitleEntry" 
+                   Placeholder="Görev adı giriniz..."
+                   HeightRequest="50"/>
+
+            <DatePicker x:Name="MyDatePicker" />
+
+            <Button Text="Ekle" 
+                    Clicked="OnAddClicked" 
+                    BackgroundColor="#512BD4" 
+                    TextColor="White"
+                    CornerRadius="8"/>
+        </VerticalStackLayout>
+
+        <ListView Grid.Row="1" 
+                  ItemsSource="{Binding TodoItems}" 
+                  Margin="0,20,0,0"
+                  HasUnevenRows="True"
+                  SeparatorColor="LightGray">
+            
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <Grid ColumnDefinitions="Auto, *" Padding="10">
+                            
+                            <CheckBox Grid.Column="0" 
+                                      IsChecked="{Binding IsCompleted}" 
+                                      VerticalOptions="Center"
+                                      Color="#512BD4"/>
+                            
+                            <StackLayout Grid.Column="1" Padding="10,0,0,0" VerticalOptions="Center">
+                                
+                                <Label Text="{Binding Title}" 
+                                       FontSize="18" 
+                                       FontAttributes="Bold">
+                                    <Label.TextColor>
+                                        <Binding Path="DueDate" Converter="{StaticResource MyColorConverter}" />
+                                    </Label.TextColor>
+                                    
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding IsCompleted}" Value="True">
+                                            <Setter Property="TextDecorations" Value="Strikethrough" />
+                                            <Setter Property="Opacity" Value="0.5" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                                
+                                <Label Text="{Binding DueDate, StringFormat='Tarih: {0:dd/MM/yyyy}'}" 
+                                       FontSize="14" 
+                                       TextColor="Gray"/>
+                            </StackLayout>
+                        </Grid>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+    </Grid>
 
 </ContentPage>

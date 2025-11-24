@@ -1,45 +1,52 @@
-﻿using CetTodoApp.Data;
+﻿using System.Collections.ObjectModel;
 
-namespace CetTodoApp;
-
-public partial class MainPage : ContentPage
+namespace CetTodoApp
 {
-   
-
-    public MainPage()
+    // Yardımcı sınıf (TodoItem)
+    public class TodoItem
     {
-        InitializeComponent();
-        FakeDb.AddToDo("Test1" ,DateTime.Now.AddDays(-1));
-        FakeDb.AddToDo("Test2" ,DateTime.Now.AddDays(1));
-        FakeDb.AddToDo("Test3" ,DateTime.Now);
-        RefreshListView();
-        ;
-
-
+        public string Title { get; set; }
+        public DateTime DueDate { get; set; }
+        public bool IsCompleted { get; set; }
     }
 
-
-    private void AddButton_OnClicked(object? sender, EventArgs e)
+    public partial class MainPage : ContentPage
     {
-        FakeDb.AddToDo(Title.Text, DueDate.Date);
-        Title.Text = string.Empty;
-        DueDate.Date=DateTime.Now;
-        RefreshListView();
-    }
+        public ObservableCollection<TodoItem> TodoItems { get; set; } = new ObservableCollection<TodoItem>();
 
-    private void RefreshListView()
-    {
-        TasksListView.ItemsSource = null;
-        TasksListView.ItemsSource = FakeDb.Data.Where(x => !x.IsComplete ||
-                                                           (x.IsComplete && x.DueDate > DateTime.Now.AddDays(-1)))
-            .ToList();
-    }
+        public MainPage()
+        {
+            InitializeComponent();
+            BindingContext = this;
+        }
 
-    private void TasksListView_OnItemSelected(object? sender, SelectedItemChangedEventArgs e)
-    {
-        var item = e.SelectedItem as TodoItem;
-       FakeDb.ChageCompletionStatus(item);
-       RefreshListView();
-       
+        private async void OnAddClicked(object sender, EventArgs e)
+        {
+            // Validasyon 1: Boş Başlık Kontrolü
+            if (string.IsNullOrWhiteSpace(TitleEntry.Text))
+            {
+                await DisplayAlert("Hata", "Lütfen yapılacak işi giriniz!", "Tamam");
+                return;
+            }
+
+            // Validasyon 2: Tarih Kontrolü
+            if (MyDatePicker.Date < DateTime.Now.Date)
+            {
+                await DisplayAlert("Hata", "Geçmişe dönük plan yapamazsınız!", "Tamam");
+                return;
+            }
+
+            // Listeye Ekleme
+            TodoItems.Add(new TodoItem
+            {
+                Title = TitleEntry.Text,
+                DueDate = MyDatePicker.Date,
+                IsCompleted = false
+            });
+
+            // Temizlik
+            TitleEntry.Text = string.Empty;
+            MyDatePicker.Date = DateTime.Now;
+        }
     }
 }
