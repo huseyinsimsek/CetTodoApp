@@ -3,41 +3,73 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="CetTodoApp.MainPage">
 
-   <VerticalStackLayout Padding="20" Margin="20">
+    <ContentPage.Resources>
+        <Style x:Key="CompletedTaskStyle" TargetType="Label">
+            <Setter Property="TextDecorations" Value="Strikethrough" />
+            <Setter Property="TextColor" Value="Gray" />
+        </Style>
+        <Style x:Key="OverdueTaskStyle" TargetType="Label">
+            <Setter Property="TextColor" Value="Red" />
+            <Setter Property="FontAttributes" Value="Bold" />
+        </Style>
+    </ContentPage.Resources>
+    
+    <VerticalStackLayout Padding="20" Margin="20">
        
-       <Border Margin="20" >
-           <VerticalStackLayout Margin="10" Padding="10">
-               <Entry x:Name="Title" Placeholder="Enter a todo Item" />
-               <HorizontalStackLayout Padding="20" Margin="10">
+        <Border Margin="20" >
+            <VerticalStackLayout Margin="10" Padding="10">
+                
+                <Entry x:Name="Title" Placeholder="Enter a todo Item" />
+                
+                <Label x:Name="TitleErrorLabel" Text="Title cannot be empty!" TextColor="Red" IsVisible="False" FontSize="Small"/>
+                
+                <HorizontalStackLayout Padding="20" Margin="10">
                     <Label Text="Due Date :" VerticalOptions="Center"></Label>
                     <DatePicker x:Name="DueDate" VerticalOptions="Center" ></DatePicker>
-               </HorizontalStackLayout>
-               <Button x:Name="AddButton" Text="Save" Clicked="AddButton_OnClicked"></Button>
+                </HorizontalStackLayout>
+
+                <Label x:Name="DueDateErrorLabel" Text="Due Date must be in the future!" TextColor="Red" IsVisible="False" FontSize="Small"/>
+
+                <Button x:Name="AddButton" Text="Save" Clicked="AddButton_OnClicked"></Button>
                
                
-           </VerticalStackLayout>
-       </Border>
-       <ListView x:Name="TasksListView" ItemSelected="TasksListView_OnItemSelected">
-           <ListView.ItemTemplate>
-               <DataTemplate>
-                   <ViewCell>
-                       <StackLayout Orientation="Horizontal">
-                           <Label Text="{Binding Title}"   
-                                  VerticalOptions="Center"  
-                                  /> 
+            </VerticalStackLayout>
+        </Border>
+        
+        <ListView x:Name="TasksListView" ItemSelected="TasksListView_OnItemSelected">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <StackLayout Orientation="Horizontal">
+                            
+                            <Label 
+                                x:Name="TaskTitleLabel"
+                                Text="{Binding Title}"   
+                                VerticalOptions="Center">
+
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label" Binding="{Binding IsComplete}" Value="True">
+                                        <Setter Property="Style" Value="{StaticResource CompletedTaskStyle}" />
+                                    </DataTrigger>
+                                    
+                                    <DataTrigger TargetType="Label" Binding="{Binding IsOverdue}" Value="True">
+                                        <Setter Property="Style" Value="{StaticResource OverdueTaskStyle}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label> 
                            
-                           <Label 
-                               Text="{Binding DueDate, StringFormat=' (Due: {0:dd/MM})'}"
-                               VerticalOptions="Center"/>
-                           <CheckBox VerticalOptions="Center" IsChecked="{Binding IsComplete}" IsEnabled="False" ></CheckBox>
+                            <Label 
+                                Text="{Binding DueDate, StringFormat=' (Due: {0:dd/MM})'}"
+                                VerticalOptions="Center"/>
+                            <CheckBox VerticalOptions="Center" IsChecked="{Binding IsComplete}" IsEnabled="False" ></CheckBox>
                          
-                       </StackLayout>
-                       </ViewCell>
-                   </DataTemplate>
-               </ListView.ItemTemplate>
-           </ListView>
+                        </StackLayout>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
        
        
-   </VerticalStackLayout>
+    </VerticalStackLayout>
 
 </ContentPage>
