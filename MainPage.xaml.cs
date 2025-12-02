@@ -1,17 +1,46 @@
 ﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using SQLite;
 
 namespace CetTodoApp
 {
-    // Yardımcı sınıf (TodoItem)
-    public class TodoItem
+    // Veritabanı Tablosu
+    [Table("todo_items")]
+    public class TodoItem : INotifyPropertyChanged
     {
+        [PrimaryKey, AutoIncrement]
+        public int Id { get; set; }
+
         public string Title { get; set; }
         public DateTime DueDate { get; set; }
-        public bool IsCompleted { get; set; }
+
+        private bool _isCompleted;
+        public bool IsCompleted
+        {
+            get => _isCompleted;
+            set
+            {
+                if (_isCompleted != value)
+                {
+                    _isCompleted = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string name = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
     }
 
     public partial class MainPage : ContentPage
     {
+        // Veritabanı Servisimiz
+        private readonly TodoService _todoService = new TodoService();
+
         public ObservableCollection<TodoItem> TodoItems { get; set; } = new ObservableCollection<TodoItem>();
 
         public MainPage()
@@ -20,31 +49,55 @@ namespace CetTodoApp
             BindingContext = this;
         }
 
+        // Uygulama ekrana geldiğinde çalışır (Verileri yükle)
+        protected override async void OnAppearing()
+        {
+            base.OnAppearing();
+            await LoadData();
+        }
+
+        // Veritabanından verileri çekip ekrana basar
+        private async Task LoadData()
+        {
+            var todoList = await _todoService.GetTodosAsync();
+
+            TodoItems.Clear(); // Ekrandaki listeyi temizle
+            foreach (var item in todoList)
+            {
+                TodoItems.Add(item); // Veritabanından gelenleri ekle
+            }
+        }
+
         private async void OnAddClicked(object sender, EventArgs e)
         {
-            // Validasyon 1: Boş Başlık Kontrolü
+            // Validasyonlar
             if (string.IsNullOrWhiteSpace(TitleEntry.Text))
             {
-                await DisplayAlert("Hata", "Lütfen yapılacak işi giriniz!", "Tamam");
+                await DisplayAlert("Hata", "Lütfen bir görev yazın.", "Tamam");
                 return;
             }
 
-            // Validasyon 2: Tarih Kontrolü
             if (MyDatePicker.Date < DateTime.Now.Date)
             {
-                await DisplayAlert("Hata", "Geçmişe dönük plan yapamazsınız!", "Tamam");
+                await DisplayAlert("Hata", "Geçmişe görev ekleyemezsiniz!", "Tamam");
                 return;
             }
 
-            // Listeye Ekleme
-            TodoItems.Add(new TodoItem
+            // Yeni Görev
+            var newItem = new TodoItem
             {
                 Title = TitleEntry.Text,
                 DueDate = MyDatePicker.Date,
                 IsCompleted = false
-            });
+            };
 
-            // Temizlik
+            // 1. Veritabanına Kaydet (Kalıcı olsun)
+            await _todoService.SaveTodoAsync(newItem);
+
+            // 2. Listeyi Yenile (Ekrana gelsin)
+            await LoadData();
+
+            // Kutuları Temizle
             TitleEntry.Text = string.Empty;
             MyDatePicker.Date = DateTime.Now;
         }
